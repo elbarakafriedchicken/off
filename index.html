@@ -9,43 +9,21 @@
     <meta name="apple-mobile-web-app-title" content="حجز الإجازات">
     <title>نظام حجز الإجازات الأسبوعية</title>
     
-    <!-- PWA Manifest (يجعل الموقع قابلاً للتثبيت كتطبيق) -->
     <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIk1vZGVyYXRpb24gVGVhbSBMZWF2ZXMiLAogICJzaG9ydF9uYW1lIjogIkxlYXZlcyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjgxYTNiIiwKICAiZGVzY3JpcHRpb24iOiAiTW9kZXJhdGlvbiBUZWFtIExlYXZlcyBCb29raW5nIFN5c3RlbSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vdXBsb2FkLndpa2ltZWRpYS5vcmcvd2lraXBlZGlhL2NvbW1vbnMvdGh1bWIvYi9iOC9GYWNlYm9va19pY29uXzIwMTMuc3ZnLzUxMnB4LUZhY2Vib29rX2ljb25fMjAxMy5zdmcucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
-    
-    <!-- أيقونة التطبيق للآيفون -->
     <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Facebook_icon_2013.svg/512px-Facebook_icon_2013.svg.png">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel (لتحويل كود React ليعمل في المتصفح) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-tap-highlight-color: transparent;}
-        
-        /* تأثيرات إضافية للتطبيق */
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* حركات بصرية (Animations) */
-        .fade-in-up {
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
+        .app-container { display: flex; flex-direction: column; min-height: 100vh; }
+        .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -54,7 +32,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- الأيقونات ---
         const CalendarDays = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>;
         const Clock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
         const Calendar = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>;
@@ -64,8 +41,9 @@
         const Download = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>;
         const Trash2 = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
         const RefreshCw = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>;
+        const Lock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>;
+        const Unlock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>;
 
-        // --- البيانات الأساسية ---
         const EMPLOYEES = [
             { id: '31279', name: 'محمد إيهاب' },
             { id: '300093', name: 'عبد الرحمن شوقي' },
@@ -78,9 +56,8 @@
         const DAYS_OF_WEEK = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 
         // ==========================================
-        // رابط جوجل سكريبت
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwB4KiAcqOzA-ERRLwdPRIF5S84qdZB_9eVSW5hreedwgpqyGMissruNdVx_XhmIutD8g/exec';
         // ==========================================
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdDVjIdTZi1zwqCw7IcLzycBcApfh2T3Wyyz8g2ZS_OtjcbidW-C3f8hJWd8MeWPXk/exec';
         
         function App() {
             const [isOpen, setIsOpen] = useState(false);
@@ -95,45 +72,19 @@
             const [message, setMessage] = useState({ type: '', text: '' });
             const [isLoading, setIsLoading] = useState(false);
             const [isFetching, setIsFetching] = useState(true);
-            const [deferredPrompt, setDeferredPrompt] = useState(null);
             const [showInstallBtn, setShowInstallBtn] = useState(false);
-            
-            // قراءة الموظف المرتبط بهذا الجهاز من الـ Local Storage
-            const [myDeviceEmpId, setMyDeviceEmpId] = useState(localStorage.getItem('myDeviceEmpId') || '');
 
             useEffect(() => {
                 const today = new Date().getDay();
-                // 3 = الأربعاء، 4 = الخميس، 5 = الجمعة
-                if (today >= 3 && today <= 5) {
+                // 2 = الثلاثاء، 5 = الجمعة
+                if (today >= 2 && today <= 5) {
                     setIsOpen(true);
                 } else {
                     setIsOpen(false);
                 }
-
                 fetchBookings();
-
-                // كود لالتقاط حدث تثبيت التطبيق
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    setDeferredPrompt(e);
-                    setShowInstallBtn(true);
-                });
-
             }, []);
 
-            // دالة تثبيت التطبيق
-            const handleInstallClick = async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        setShowInstallBtn(false);
-                    }
-                    setDeferredPrompt(null);
-                }
-            };
-
-            // دالة جلب البيانات من جوجل شيت
             const fetchBookings = async () => {
                 setIsFetching(true);
                 try {
@@ -153,7 +104,6 @@
                 }
             };
 
-            // دالة إرسال الحجز لجوجل شيت
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 setMessage({ type: '', text: '' });
@@ -169,8 +119,8 @@
                 const requestData = { 
                     day: selectedDay, 
                     name: empName, 
-                    empId: selectedEmpId, 
-                    note: note.trim() 
+                    empId: selectedEmpId,
+                    note: note.trim()
                 };
 
                 try {
@@ -186,66 +136,60 @@
                     
                     if (result.success) {
                         setMessage({ type: 'success', text: result.message });
-                        
-                        // حفظ هوية الموظف على هذا الجهاز لكي يتمكن من التعديل/الإلغاء
-                        if (!isAdmin) {
-                            localStorage.setItem('myDeviceEmpId', selectedEmpId);
-                            setMyDeviceEmpId(selectedEmpId);
-                        }
-                        
                         setSelectedDay('');
-                        setSelectedEmpId('');
-                        setNote('');
-                        fetchBookings(); // تحديث الجدول فوراً بعد الحجز
+                        setNote(''); // تفريغ الملاحظة بعد النجاح
+                        fetchBookings(); 
                     } else {
                         setMessage({ type: 'error', text: result.message });
-                        fetchBookings(); // تحديث الجدول ربما يكون شخص آخر حجز
+                        fetchBookings();
                     }
                 } catch (error) {
-                    setMessage({ type: 'error', text: 'حدث خطأ في الاتصال بالخادم. تأكد من إعدادات جوجل شيت.' });
-                    console.error(error);
+                    setMessage({ type: 'error', text: 'حدث خطأ في الاتصال. تأكد من إعدادات جوجل شيت.' });
                 } finally {
                     setIsLoading(false);
                 }
             };
 
-            // دالة إلغاء الحجز (لصاحب الجهاز أو المشرف)
-            const handleCancel = async (empIdToCancel, isByAdmin = false) => {
-                const confirmMsg = isByAdmin 
-                    ? 'بصفتك مشرف: هل أنت متأكد من إلغاء حجز هذا الموظف؟' 
-                    : 'هل أنت متأكد أنك تريد إلغاء حجزك ليوم الإجازة؟';
-
-                if (!window.confirm(confirmMsg)) return;
+            const handleCancel = async (empIdToCancel, dayToCancel) => {
+                if (!window.confirm(`بصفتك مشرف: هل أنت متأكد من إلغاء حجز يوم ${dayToCancel} لهذا الموظف؟`)) return;
 
                 setIsLoading(true);
                 try {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ action: 'cancel', empId: empIdToCancel }),
+                        body: JSON.stringify({ action: 'cancel', empId: empIdToCancel, day: dayToCancel }),
                         headers: {
                             'Content-Type': 'text/plain;charset=utf-8',
                         }
                     });
                     
                     const result = await response.json();
-                    
                     if (result.success) {
-                        setMessage({ type: 'success', text: 'تم إلغاء الحجز بنجاح' });
-                        
-                        // إزالة الارتباط بالجهاز بعد الإلغاء فقط إذا كان هو صاحب الحجز
-                        if (!isByAdmin) {
-                            localStorage.removeItem('myDeviceEmpId');
-                            setMyDeviceEmpId('');
-                        }
+                        setMessage({ type: 'success', text: 'تم إلغاء اليوم بنجاح' });
                         fetchBookings();
                     } else {
                         setMessage({ type: 'error', text: result.message });
                     }
                 } catch (error) {
                     setMessage({ type: 'error', text: 'حدث خطأ أثناء الإلغاء.' });
-                    console.error(error);
                 } finally {
                     setIsLoading(false);
+                }
+            };
+            
+            const handleAdminLogin = () => {
+                if (!isAdmin) {
+                    const pass = prompt('أدخل الرمز السري للمشرفين:');
+                    if (pass === '1234') { 
+                        setIsAdmin(true);
+                        setMessage({ type: 'success', text: 'تم تسجيل الدخول كـ مشرف بنجاح.' });
+                    } else if (pass !== null && pass !== "") {
+                        alert('الرمز السري غير صحيح!');
+                    }
+                } else {
+                    if(window.confirm('هل تريد الخروج من وضع المشرف؟')) {
+                        setIsAdmin(false);
+                    }
                 }
             };
 
@@ -255,26 +199,8 @@
                 <div className="app-container text-right" dir="rtl">
                     {/* Header */}
                     <header className="bg-white border-t-8 border-red-600 shadow-sm mb-6 pb-2 relative">
-                        {/* زر تحميل التطبيق يظهر فقط إذا كان متاحاً (على الموبايل) */}
-                        {showInstallBtn && (
-                           <button 
-                                onClick={handleInstallClick}
-                                className="absolute top-4 left-4 flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-full shadow-sm border border-slate-200 transition-colors"
-                            >
-                                <Download className="w-3.5 h-3.5" />
-                                <span>تثبيت كتطبيق</span>
-                            </button>
-                        )}
-
                         <div className="container mx-auto px-4 pt-8 pb-4 max-w-3xl text-center flex flex-col items-center">
-                            
-                            {/* كود SVG مباشر للوجو فيس بوك */}
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                viewBox="0 0 24 24" 
-                                className="w-16 h-16 md:w-20 md:h-20 mb-3 drop-shadow-sm text-[#1877F2]" 
-                                fill="currentColor"
-                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-16 h-16 md:w-20 md:h-20 mb-3 drop-shadow-sm text-[#1877F2]" fill="currentColor">
                                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                             </svg>
                             
@@ -288,83 +214,18 @@
                             
                             <div className="inline-flex items-center gap-2 bg-slate-50 text-slate-600 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium border border-slate-200 shadow-sm">
                                 <Clock className="w-4 h-4 text-[#2e9474] shrink-0" />
-                                <span className="leading-tight">مواعيد الحجز: من الأربعاء حتى الجمعة (الجدول يتجدد أسبوعياً)</span>
+                                <span className="leading-tight">مواعيد الحجز: من الثلاثاء حتى الجمعة (يتجدد أسبوعياً)</span>
                             </div>
                         </div>
                     </header>
 
                     <main className="container mx-auto px-4 pb-12 max-w-3xl flex-grow">
-                        {/* بانر حالة النظام */}
-                        <div className={`fade-in-up rounded-xl p-4 mb-6 flex items-start md:items-center justify-between shadow-sm border ${isSystemActive ? 'bg-blue-50/80 border-blue-200' : 'bg-red-50/80 border-red-200'}`}>
-                            <div className="flex items-start gap-3">
-                                <Clock className={`w-5 h-5 md:w-6 md:h-6 mt-0.5 shrink-0 ${isSystemActive ? 'text-blue-600' : 'text-red-600'}`} />
-                                <div>
-                                    <h2 className={`font-semibold text-sm md:text-base mb-1 ${isSystemActive ? 'text-blue-800' : 'text-red-800'}`}>
-                                        {globalForceOpen ? 'النظام مفتوح للجميع (بواسطة المشرف)' : isOpen ? 'النظام مفتوح الآن للتسجيل' : (isAdmin ? 'مفتوح كصلاحية مشرف' : 'النظام مغلق حالياً')}
-                                    </h2>
-                                    <p className={`text-xs md:text-sm leading-relaxed ${isSystemActive ? 'text-blue-600' : 'text-red-600'}`}>
-                                        تفتح طلبات الإجازة من الأربعاء حتى الجمعة من كل أسبوع.
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex flex-col gap-2 shrink-0">
-                                {!isAdmin ? (
-                                    <button 
-                                        onClick={() => {
-                                            // طلب كلمة المرور
-                                            const pass = prompt('أدخل الرمز السري للمشرفين:');
-                                            if (pass === '1234') { // الرمز السري
-                                                setIsAdmin(true);
-                                            } else if (pass !== null && pass !== "") {
-                                                alert('الرمز السري غير صحيح!');
-                                            }
-                                        }} 
-                                        className="text-xs bg-white shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md transition-colors flex items-center justify-center gap-1"
-                                    >
-                                        دخول المشرف 🔒
-                                    </button>
-                                ) : (
-                                    <>
-                                        <button 
-                                            onClick={async () => {
-                                                const action = globalForceOpen ? 'closeSystem' : 'openSystem';
-                                                setIsLoading(true);
-                                                try {
-                                                    await fetch(SCRIPT_URL, {
-                                                        method: 'POST',
-                                                        body: JSON.stringify({ action: action }),
-                                                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                                                    });
-                                                    await fetchBookings();
-                                                } catch (e) {
-                                                    console.error(e);
-                                                } finally {
-                                                    setIsLoading(false);
-                                                }
-                                            }}
-                                            disabled={isLoading}
-                                            className={`text-xs text-white px-3 py-1.5 rounded-md transition-colors shadow-sm flex items-center justify-center ${globalForceOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-[#2e9474] hover:bg-[#23785d]'}`}
-                                        >
-                                            {globalForceOpen ? 'إغلاق للجميع 🔴' : 'فتح للجميع 🟢'}
-                                        </button>
-                                        <button 
-                                            onClick={() => setIsAdmin(false)} 
-                                            className="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-md transition-colors"
-                                        >
-                                            تسجيل خروج
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
                         <div className="grid md:grid-cols-2 gap-6">
-                            {/* نموذج الحجز */}
+                            {/* Booking Form */}
                             <div className="fade-in-up delay-100 bg-white rounded-2xl shadow-sm border border-slate-100 p-5 md:p-6 h-fit">
                                 <h2 className="text-base md:text-lg font-bold text-slate-800 mb-5 pb-3 border-b border-slate-100 flex items-center gap-2">
                                     <Calendar className="w-5 h-5 text-[#2e9474]"/>
-                                    طلب يوم إجازة
+                                    طلب إجازة
                                 </h2>
 
                                 {message.text && (
@@ -386,14 +247,15 @@
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">اليوم المطلوب</label>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">اختر اليوم</label>
                                         <div className="grid grid-cols-2 gap-2.5">
                                             {DAYS_OF_WEEK.map(day => {
-                                                const isBooked = bookings.some(b => b.day === day);
+                                                // نمنع الزر فقط إذا كان هذا الموظف قد حجز هذا اليوم بالفعل
+                                                const isBookedBySelectedEmp = selectedEmpId ? bookings.some(b => b.day === day && b.empId === selectedEmpId) : false;
                                                 return (
-                                                    <button key={day} type="button" disabled={!isSystemActive || isBooked || isLoading} onClick={() => setSelectedDay(day)}
-                                                        className={`p-2.5 rounded-xl text-sm font-medium transition-all border ${selectedDay === day ? 'bg-[#2e9474] text-white border-[#2e9474] shadow-md shadow-[#2e9474]/20' : isBooked ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-60' : 'bg-white text-slate-700 border-slate-200 hover:border-[#2e9474]/50 hover:bg-slate-50 active:scale-[0.98]'}`}>
-                                                        {day} {isBooked && '(محجوز)'}
+                                                    <button key={day} type="button" disabled={!isSystemActive || isBookedBySelectedEmp || isLoading} onClick={() => setSelectedDay(day)}
+                                                        className={`p-2.5 rounded-xl text-sm font-medium transition-all border ${selectedDay === day ? 'bg-[#2e9474] text-white border-[#2e9474] shadow-md shadow-[#2e9474]/20' : isBookedBySelectedEmp ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-60' : 'bg-white text-slate-700 border-slate-200 hover:border-[#2e9474]/50 hover:bg-slate-50 active:scale-[0.98]'}`}>
+                                                        {day} {isBookedBySelectedEmp && '(محجوز لك)'}
                                                     </button>
                                                 )
                                             })}
@@ -402,47 +264,72 @@
 
                                     <div>
                                         <label className="block text-sm font-semibold text-slate-700 mb-2">سبب أو ظرف مهم (اختياري)</label>
-                                        <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!isSystemActive || isLoading} placeholder="إذا كان لديك مشوار ضروري، يمكنك كتابته هنا..." className="w-full border border-slate-200 rounded-xl p-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#2e9474]/20 focus:border-[#2e9474] outline-none transition-all disabled:opacity-50 resize-none h-24 text-sm leading-relaxed"></textarea>
+                                        <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!isSystemActive || isLoading} placeholder="ملاحظاتك هنا..." className="w-full border border-slate-200 rounded-xl p-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#2e9474]/20 focus:border-[#2e9474] outline-none transition-all disabled:opacity-50 resize-none h-20 text-sm leading-relaxed"></textarea>
                                     </div>
 
-                                    <button type="submit" disabled={!isSystemActive || isLoading} className="w-full bg-[#2e9474] hover:bg-[#23785d] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-sm shadow-[#2e9474]/20 active:scale-[0.98]">
-                                        {isLoading ? (
-                                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                        ) : (
-                                            'تأكيد الحجز'
-                                        )}
-                                    </button>
+                                    {!isSystemActive && !isAdmin ? (
+                                        <div className="text-center text-sm font-medium text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
+                                            النظام مغلق حالياً. يفتح من الثلاثاء للجمعة.
+                                        </div>
+                                    ) : (
+                                        <button type="submit" disabled={isLoading} className="w-full bg-[#2e9474] hover:bg-[#23785d] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-sm shadow-[#2e9474]/20 active:scale-[0.98]">
+                                            {isLoading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : 'تأكيد الحجز'}
+                                        </button>
+                                    )}
+                                    
+                                    {isAdmin && (
+                                        <div className="flex justify-center mt-2">
+                                            <button 
+                                                type="button"
+                                                onClick={async () => {
+                                                    const action = globalForceOpen ? 'closeSystem' : 'openSystem';
+                                                    setIsLoading(true);
+                                                    try {
+                                                        await fetch(SCRIPT_URL, {
+                                                            method: 'POST',
+                                                            body: JSON.stringify({ action: action }),
+                                                            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                                                        });
+                                                        await fetchBookings();
+                                                    } catch (e) {
+                                                        console.error(e);
+                                                    } finally {
+                                                        setIsLoading(false);
+                                                    }
+                                                }}
+                                                disabled={isLoading}
+                                                className={`text-xs text-white px-4 py-2 rounded-xl transition-colors shadow-sm w-full font-bold ${globalForceOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                            >
+                                                {globalForceOpen ? 'إغلاق النظام إجبارياً 🔴' : 'فتح النظام للجميع 🟢 (صلاحية مشرف)'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </form>
                             </div>
 
-                            {/* جدول البيانات */}
+                            {/* Data Table */}
                             <div className="fade-in-up delay-200 bg-white rounded-2xl shadow-sm border border-slate-100 p-5 md:p-6 h-fit flex flex-col">
                                 <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
                                     <h2 className="text-base md:text-lg font-bold text-slate-800 flex items-center gap-2">
                                         <Users className="w-5 h-5 text-blue-600"/>
                                         جدول إجازات الأسبوع
                                     </h2>
-                                    <button 
-                                        onClick={fetchBookings} 
-                                        disabled={isFetching}
-                                        className="text-slate-400 hover:text-[#2e9474] transition-colors p-1 rounded-full hover:bg-slate-50 active:scale-95"
-                                        title="تحديث البيانات الفوري"
-                                    >
-                                        <RefreshCw className={`w-5 h-5 ${isFetching ? 'animate-spin text-[#2e9474]' : ''}`} />
-                                    </button>
-                                </div>
-                                
-                                {/* شريط اكتمال الحجوزات */}
-                                <div className="mb-5 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <div className="flex justify-between text-xs mb-1.5 font-medium text-slate-600">
-                                        <span>أيام محجوزة: <span className="text-[#2e9474] font-bold">{bookings.length}</span></span>
-                                        <span>المتبقي: <span className="font-bold">{DAYS_OF_WEEK.length - bookings.length}</span></span>
-                                    </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                        <div 
-                                            className="bg-[#2e9474] h-2.5 rounded-full transition-all duration-1000 ease-out" 
-                                            style={{ width: `${(bookings.length / DAYS_OF_WEEK.length) * 100}%` }}
-                                        ></div>
+                                    <div className="flex gap-1 items-center">
+                                        <button 
+                                            onClick={handleAdminLogin} 
+                                            className={`transition-colors p-1.5 rounded-full hover:bg-slate-100 active:scale-95 ${isAdmin ? 'text-red-500 bg-red-50' : 'text-slate-300'}`}
+                                            title={isAdmin ? "خروج من وضع المشرف" : "دخول المشرف (سري)"}
+                                        >
+                                            {isAdmin ? <Unlock className="w-4 h-4"/> : <Lock className="w-4 h-4"/>}
+                                        </button>
+                                        <button 
+                                            onClick={fetchBookings} 
+                                            disabled={isFetching}
+                                            className="text-slate-400 hover:text-[#2e9474] transition-colors p-1.5 rounded-full hover:bg-slate-100 active:scale-95"
+                                            title="تحديث البيانات الفوري"
+                                        >
+                                            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin text-[#2e9474]' : ''}`} />
+                                        </button>
                                     </div>
                                 </div>
                                 
@@ -463,42 +350,36 @@
                                                     <th className="px-4 py-3.5 font-semibold border-b border-slate-100">اليوم</th>
                                                     <th className="px-4 py-3.5 font-semibold border-b border-slate-100">الموظف</th>
                                                     <th className="px-4 py-3.5 font-semibold border-b border-slate-100">ملاحظات</th>
-                                                    <th className="px-2 py-3.5 font-semibold border-b border-slate-100 w-10"></th>
+                                                    {isAdmin && <th className="px-2 py-3.5 font-semibold border-b border-slate-100 w-10"></th>}
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-50">
-                                                {bookings.map((booking, index) => {
-                                                    // هل الحجز يخص الجهاز الحالي؟
-                                                    const isMyBooking = booking.empId === myDeviceEmpId;
-                                                    
-                                                    return (
-                                                        <tr key={index} className={`transition-colors ${isMyBooking ? 'bg-[#2e9474]/5 border-r-4 border-[#2e9474]' : 'hover:bg-slate-50/50'}`}>
-                                                            <td className="px-4 py-3.5 font-bold text-[#2e9474] whitespace-nowrap w-1/4">
-                                                                {booking.day}
-                                                            </td>
-                                                            <td className="px-4 py-3.5 text-slate-800 whitespace-nowrap">
-                                                                <div className="font-medium">{booking.name}</div>
-                                                                <div className="text-[10px] text-slate-400 mt-0.5">{booking.empId}</div>
-                                                            </td>
-                                                            <td className="px-4 py-3.5 text-slate-500 text-xs w-1/3 max-w-[120px] truncate" title={booking.note}>
-                                                                {booking.note ? booking.note : <span className="text-slate-300">-</span>}
-                                                            </td>
+                                                {bookings.map((booking, index) => (
+                                                    <tr key={index} className="hover:bg-slate-50/50 transition-colors">
+                                                        <td className="px-4 py-3.5 font-bold text-[#2e9474] whitespace-nowrap w-1/4">
+                                                            {booking.day}
+                                                        </td>
+                                                        <td className="px-4 py-3.5 text-slate-800 whitespace-nowrap">
+                                                            <div className="font-medium">{booking.name}</div>
+                                                            <div className="text-[10px] text-slate-400 mt-0.5">{booking.empId}</div>
+                                                        </td>
+                                                        <td className="px-4 py-3.5 text-slate-500 text-xs w-1/3 max-w-[120px] truncate" title={booking.note}>
+                                                            {booking.note ? booking.note : <span className="text-slate-300">-</span>}
+                                                        </td>
+                                                        {isAdmin && (
                                                             <td className="px-2 py-3.5 whitespace-nowrap text-left">
-                                                                {/* يظهر زر الحذف إما لصاحب الحجز، أو للمشرف في كل الأوقات */}
-                                                                {(isMyBooking || isAdmin) && (
-                                                                    <button 
-                                                                        onClick={() => handleCancel(booking.empId, !isMyBooking)}
-                                                                        disabled={isLoading}
-                                                                        className={`${!isMyBooking ? 'text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100' : 'text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100'} p-1.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50`}
-                                                                        title={isMyBooking ? "إلغاء حجزك" : "حذف كـ مشرف"}
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
-                                                                )}
+                                                                <button 
+                                                                    onClick={() => handleCancel(booking.empId, booking.day)}
+                                                                    disabled={isLoading}
+                                                                    className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                                                                    title="حذف هذا اليوم"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
                                                             </td>
-                                                        </tr>
-                                                    );
-                                                })}
+                                                        )}
+                                                    </tr>
+                                                ))}
                                             </tbody>
                                         </table>
                                     </div>
@@ -512,24 +393,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-    
-    <!-- Service Worker للتطبيق لكي يعمل بشكل صحيح كـ PWA -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `
-                    self.addEventListener('install', (e) => { self.skipWaiting(); });
-                    self.addEventListener('fetch', (e) => { });
-                `;
-                const blob = new Blob([swCode], {type: 'application/javascript'});
-                const swUrl = URL.createObjectURL(blob);
-                
-                navigator.serviceWorker.register(swUrl)
-                    .then(registration => { console.log('SW registered'); })
-                    .catch(registrationError => { console.log('SW registration failed'); });
-            });
-        }
     </script>
 </body>
 </html>
