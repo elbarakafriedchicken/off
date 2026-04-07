@@ -86,6 +86,7 @@
         function App() {
             const [isOpen, setIsOpen] = useState(false);
             const [isAdmin, setIsAdmin] = useState(false); // تم تغييرها من testMode لتشمل صلاحيات الإدارة
+            const [globalForceOpen, setGlobalForceOpen] = useState(false); // حالة لفتح النظام للجميع من قبل المشرف
             
             const [selectedEmpId, setSelectedEmpId] = useState('');
             const [selectedDay, setSelectedDay] = useState('');
@@ -145,7 +146,14 @@
                 try {
                     const response = await fetch(SCRIPT_URL);
                     const data = await response.json();
-                    setBookings(data);
+                    
+                    // التوافق مع التحديث الجديد لجوجل شيت الذي يرسل حالة النظام
+                    if (Array.isArray(data)) {
+                        setBookings(data);
+                    } else {
+                        setBookings(data.bookings || []);
+                        setGlobalForceOpen(data.forceOpen === true);
+                    }
                 } catch (error) {
                     console.error('Error fetching data:', error);
                 } finally {
@@ -215,47 +223,7 @@
                 }
             };
 
-            // دالة إلغاء الحجز (لصاحب الجهاز أو المشرف)
-            const handleCancel = async (empIdToCancel, isByAdmin = false) => {
-                const confirmMsg = isByAdmin 
-                    ? 'بصفتك مشرف: هل أنت متأكد من إلغاء حجز هذا الموظف؟' 
-                    : 'هل أنت متأكد أنك تريد إلغاء حجزك ليوم الإجازة؟';
-
-                if (!window.confirm(confirmMsg)) return;
-
-                setIsLoading(true);
-                try {
-                    const response = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'cancel', empId: empIdToCancel }),
-                        headers: {
-                            'Content-Type': 'text/plain;charset=utf-8',
-                        }
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        setMessage({ type: 'success', text: 'تم إلغاء الحجز بنجاح' });
-                        
-                        // إزالة الارتباط بالجهاز بعد الإلغاء فقط إذا كان هو صاحب الحجز
-                        if (!isByAdmin) {
-                            localStorage.removeItem('myDeviceEmpId');
-                            setMyDeviceEmpId('');
-                        }
-                        fetchBookings();
-                    } else {
-                        setMessage({ type: 'error', text: result.message });
-                    }
-                } catch (error) {
-                    setMessage({ type: 'error', text: 'حدث خطأ أثناء الإلغاء.' });
-                    console.error(error);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-
-            const isSystemActive = isOpen || isAdmin;
+            const isSystemActive = isOpen || globalForceOpen || isAdmin;
 
             return (
                 <div className="app-container text-right" dir="rtl">
@@ -306,31 +274,63 @@
                                 <Clock className={`w-5 h-5 md:w-6 md:h-6 mt-0.5 shrink-0 ${isSystemActive ? 'text-blue-600' : 'text-red-600'}`} />
                                 <div>
                                     <h2 className={`font-semibold text-sm md:text-base mb-1 ${isSystemActive ? 'text-blue-800' : 'text-red-800'}`}>
-                                        {isOpen ? 'النظام مفتوح الآن للتسجيل' : (isAdmin ? 'مفتوح كصلاحية مشرف' : 'النظام مغلق حالياً')}
+                                        {globalForceOpen ? 'النظام مفتوح للجميع (بواسطة المشرف)' : isOpen ? 'النظام مفتوح الآن للتسجيل' : (isAdmin ? 'مفتوح كصلاحية مشرف' : 'النظام مغلق حالياً')}
                                     </h2>
                                     <p className={`text-xs md:text-sm leading-relaxed ${isSystemActive ? 'text-blue-600' : 'text-red-600'}`}>
                                         تفتح طلبات الإجازة من الأربعاء حتى الجمعة من كل أسبوع.
                                     </p>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => {
-                                    if (!isAdmin) {
-                                        // طلب كلمة المرور
-                                        const pass = prompt('أدخل الرمز السري للمشرفين:');
-                                        if (pass === '1234') { // يمكنك تغيير الرقم 1234 لأي باسورد تريده من هنا
-                                            setIsAdmin(true);
-                                        } else if (pass !== null && pass !== "") {
-                                            alert('الرمز السري غير صحيح!');
-                                        }
-                                    } else {
-                                        setIsAdmin(false);
-                                    }
-                                }} 
-                                className="text-xs shrink-0 bg-white shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
-                            >
-                                {isAdmin ? 'إغلاق وضع المشرف' : 'دخول المشرف 🔒'}
-                            </button>
+                            
+                            <div className="flex flex-col gap-2 shrink-0">
+                                {!isAdmin ? (
+                                    <button 
+                                        onClick={() => {
+                                            // طلب كلمة المرور
+                                            const pass = prompt('أدخل الرمز السري للمشرفين:');
+                                            if (pass === '1234') { // يمكنك تغيير الرقم 1234 لأي باسورد تريده من هنا
+                                                setIsAdmin(true);
+                                            } else if (pass !== null && pass !== "") {
+                                                alert('الرمز السري غير صحيح!');
+                                            }
+                                        }} 
+                                        className="text-xs bg-white shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md transition-colors flex items-center justify-center gap-1"
+                                    >
+                                        دخول المشرف 🔒
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button 
+                                            onClick={async () => {
+                                                const action = globalForceOpen ? 'closeSystem' : 'openSystem';
+                                                setIsLoading(true);
+                                                try {
+                                                    await fetch(SCRIPT_URL, {
+                                                        method: 'POST',
+                                                        body: JSON.stringify({ action: action }),
+                                                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                                                    });
+                                                    await fetchBookings(); // تحديث الحالة
+                                                } catch (e) {
+                                                    console.error(e);
+                                                } finally {
+                                                    setIsLoading(false);
+                                                }
+                                            }}
+                                            disabled={isLoading}
+                                            className={`text-xs text-white px-3 py-1.5 rounded-md transition-colors shadow-sm flex items-center justify-center ${globalForceOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-[#2e9474] hover:bg-[#23785d]'}`}
+                                        >
+                                            {globalForceOpen ? 'إغلاق للجميع 🔴' : 'فتح للجميع 🟢'}
+                                        </button>
+                                        <button 
+                                            onClick={() => setIsAdmin(false)} 
+                                            className="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-md transition-colors"
+                                        >
+                                            تسجيل خروج
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
