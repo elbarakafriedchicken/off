@@ -85,7 +85,7 @@
         
         function App() {
             const [isOpen, setIsOpen] = useState(false);
-            const [testMode, setTestMode] = useState(false);
+            const [isAdmin, setIsAdmin] = useState(false); // تم تغييرها من testMode لتشمل صلاحيات الإدارة
             
             const [selectedEmpId, setSelectedEmpId] = useState('');
             const [selectedDay, setSelectedDay] = useState('');
@@ -193,9 +193,11 @@
                     if (result.success) {
                         setMessage({ type: 'success', text: result.message });
                         
-                        // حفظ هوية الموظف على هذا الجهاز لكي يتمكن من التعديل/الإلغاء
-                        localStorage.setItem('myDeviceEmpId', selectedEmpId);
-                        setMyDeviceEmpId(selectedEmpId);
+                        // حفظ هوية الموظف على هذا الجهاز لكي يتمكن من التعديل/الإلغاء (إلا إذا كان المشرف هو من يحجز)
+                        if (!isAdmin) {
+                            localStorage.setItem('myDeviceEmpId', selectedEmpId);
+                            setMyDeviceEmpId(selectedEmpId);
+                        }
                         
                         setSelectedDay('');
                         setSelectedEmpId('');
@@ -213,9 +215,13 @@
                 }
             };
 
-            // دالة إلغاء الحجز (لصاحب الجهاز فقط)
-            const handleCancel = async (empIdToCancel) => {
-                if (!window.confirm('هل أنت متأكد أنك تريد إلغاء حجزك ليوم الإجازة؟')) return;
+            // دالة إلغاء الحجز (لصاحب الجهاز أو المشرف)
+            const handleCancel = async (empIdToCancel, isByAdmin = false) => {
+                const confirmMsg = isByAdmin 
+                    ? 'بصفتك مشرف: هل أنت متأكد من إلغاء حجز هذا الموظف؟' 
+                    : 'هل أنت متأكد أنك تريد إلغاء حجزك ليوم الإجازة؟';
+
+                if (!window.confirm(confirmMsg)) return;
 
                 setIsLoading(true);
                 try {
@@ -231,9 +237,12 @@
                     
                     if (result.success) {
                         setMessage({ type: 'success', text: 'تم إلغاء الحجز بنجاح' });
-                        // إزالة الارتباط بالجهاز بعد الإلغاء ليتمكن من حجز يوم آخر
-                        localStorage.removeItem('myDeviceEmpId');
-                        setMyDeviceEmpId('');
+                        
+                        // إزالة الارتباط بالجهاز بعد الإلغاء فقط إذا كان هو صاحب الحجز
+                        if (!isByAdmin) {
+                            localStorage.removeItem('myDeviceEmpId');
+                            setMyDeviceEmpId('');
+                        }
                         fetchBookings();
                     } else {
                         setMessage({ type: 'error', text: result.message });
@@ -246,7 +255,7 @@
                 }
             };
 
-            const isSystemActive = isOpen || testMode;
+            const isSystemActive = isOpen || isAdmin;
 
             return (
                 <div className="app-container text-right" dir="rtl">
@@ -297,33 +306,31 @@
                                 <Clock className={`w-5 h-5 md:w-6 md:h-6 mt-0.5 shrink-0 ${isSystemActive ? 'text-blue-600' : 'text-red-600'}`} />
                                 <div>
                                     <h2 className={`font-semibold text-sm md:text-base mb-1 ${isSystemActive ? 'text-blue-800' : 'text-red-800'}`}>
-                                        {isSystemActive ? 'النظام مفتوح الآن للتسجيل' : 'النظام مغلق حالياً'}
+                                        {isOpen ? 'النظام مفتوح الآن للتسجيل' : (isAdmin ? 'مفتوح كصلاحية مشرف' : 'النظام مغلق حالياً')}
                                     </h2>
                                     <p className={`text-xs md:text-sm leading-relaxed ${isSystemActive ? 'text-blue-600' : 'text-red-600'}`}>
                                         تفتح طلبات الإجازة من الأربعاء حتى الجمعة من كل أسبوع.
                                     </p>
                                 </div>
                             </div>
-                            {!isOpen && (
-                                <button 
-                                    onClick={() => {
-                                        if (!testMode) {
-                                            // طلب كلمة المرور
-                                            const pass = prompt('أدخل الرمز السري للمشرفين لتفعيل التجربة:');
-                                            if (pass === '1234') { // يمكنك تغيير الرقم 1234 لأي باسورد تريده من هنا
-                                                setTestMode(true);
-                                            } else if (pass !== null && pass !== "") {
-                                                alert('الرمز السري غير صحيح!');
-                                            }
-                                        } else {
-                                            setTestMode(false);
+                            <button 
+                                onClick={() => {
+                                    if (!isAdmin) {
+                                        // طلب كلمة المرور
+                                        const pass = prompt('أدخل الرمز السري للمشرفين:');
+                                        if (pass === '1234') { // يمكنك تغيير الرقم 1234 لأي باسورد تريده من هنا
+                                            setIsAdmin(true);
+                                        } else if (pass !== null && pass !== "") {
+                                            alert('الرمز السري غير صحيح!');
                                         }
-                                    }} 
-                                    className="text-xs shrink-0 bg-white shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
-                                >
-                                    {testMode ? 'إلغاء التجربة' : 'تفعيل للتجربة 🔒'}
-                                </button>
-                            )}
+                                    } else {
+                                        setIsAdmin(false);
+                                    }
+                                }} 
+                                className="text-xs shrink-0 bg-white shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
+                            >
+                                {isAdmin ? 'إغلاق وضع المشرف' : 'دخول المشرف 🔒'}
+                            </button>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
@@ -434,32 +441,38 @@
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-50">
-                                                {bookings.map((booking, index) => (
-                                                    <tr key={index} className={`transition-colors ${booking.empId === myDeviceEmpId ? 'bg-[#2e9474]/5 border-r-4 border-[#2e9474]' : 'hover:bg-slate-50/50'}`}>
-                                                        <td className="px-4 py-3.5 font-bold text-[#2e9474] whitespace-nowrap w-1/4">
-                                                            {booking.day}
-                                                        </td>
-                                                        <td className="px-4 py-3.5 text-slate-800 whitespace-nowrap">
-                                                            <div className="font-medium">{booking.name}</div>
-                                                            <div className="text-[10px] text-slate-400 mt-0.5">{booking.empId}</div>
-                                                        </td>
-                                                        <td className="px-4 py-3.5 text-slate-500 text-xs w-1/3 max-w-[120px] truncate" title={booking.note}>
-                                                            {booking.note ? booking.note : <span className="text-slate-300">-</span>}
-                                                        </td>
-                                                        <td className="px-2 py-3.5 whitespace-nowrap text-left">
-                                                            {booking.empId === myDeviceEmpId && (
-                                                                <button 
-                                                                    onClick={() => handleCancel(booking.empId)}
-                                                                    disabled={!isSystemActive || isLoading}
-                                                                    className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
-                                                                    title="إلغاء حجزك"
-                                                                >
-                                                                    <Trash2 className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {bookings.map((booking, index) => {
+                                                    // هل الحجز يخص الجهاز الحالي؟
+                                                    const isMyBooking = booking.empId === myDeviceEmpId;
+                                                    
+                                                    return (
+                                                        <tr key={index} className={`transition-colors ${isMyBooking ? 'bg-[#2e9474]/5 border-r-4 border-[#2e9474]' : 'hover:bg-slate-50/50'}`}>
+                                                            <td className="px-4 py-3.5 font-bold text-[#2e9474] whitespace-nowrap w-1/4">
+                                                                {booking.day}
+                                                            </td>
+                                                            <td className="px-4 py-3.5 text-slate-800 whitespace-nowrap">
+                                                                <div className="font-medium">{booking.name}</div>
+                                                                <div className="text-[10px] text-slate-400 mt-0.5">{booking.empId}</div>
+                                                            </td>
+                                                            <td className="px-4 py-3.5 text-slate-500 text-xs w-1/3 max-w-[120px] truncate" title={booking.note}>
+                                                                {booking.note ? booking.note : <span className="text-slate-300">-</span>}
+                                                            </td>
+                                                            <td className="px-2 py-3.5 whitespace-nowrap text-left">
+                                                                {/* يظهر زر الحذف إما لصاحب الحجز، أو للمشرف في كل الأوقات */}
+                                                                {(isMyBooking || isAdmin) && (
+                                                                    <button 
+                                                                        onClick={() => handleCancel(booking.empId, !isMyBooking)}
+                                                                        disabled={isLoading}
+                                                                        className={`${!isMyBooking ? 'text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100' : 'text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100'} p-1.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50`}
+                                                                        title={isMyBooking ? "إلغاء حجزك" : "حذف كـ مشرف"}
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
